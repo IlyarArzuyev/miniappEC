@@ -3,133 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ипотечный помощник</title>
+    <title>Личный кабинет</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
+            margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            text-align: center;
+            background-color: #f4f4f4;
         }
-
         .container {
-            max-width: 400px;
-            margin: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        .status-box {
-            background: #e3f2fd;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
+        h2 {
+            color: #333;
         }
-
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-        button {
-            background: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .download-btn {
-            display: block;
-            background: #007bff;
-            color: white;
-            padding: 10px;
-            text-decoration: none;
+        .info {
             margin: 10px 0;
+            font-size: 18px;
+        }
+        .btn {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background: #007bff;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-secondary {
+            background: #28a745;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏠 Личный кабинет</h1>
-        <p><strong>ФИО:</strong> <span id="clientName">Загрузка...</span></p>
-        <p><strong>ID клиента:</strong> <span id="clientID">Загрузка...</span></p>
-
-        <div class="status-box">
-            <p><strong>📌 Текущий статус:</strong> <span id="clientStatus">Загрузка...</span></p>
-            <p><strong>⏭️ Следующий шаг:</strong> <span id="nextStep">Загрузка...</span></p>
-        </div>
-
-        <a href="checklist.pdf" download class="download-btn">📄 Скачать чек-лист</a>
-
-        <div class="calculator">
-            <h2>📊 Ипотечный калькулятор</h2>
-            <label>Сумма кредита (тенге):</label>
-            <input type="number" id="loanAmount" placeholder="Введите сумму">
-
-            <label>Процентная ставка (%):</label>
-            <input type="number" id="interestRate" placeholder="Введите ставку">
-
-            <label>Первоначальный взнос (₽):</label>
-            <input type="number" id="downPayment" placeholder="Введите взнос">
-
-            <label>Срок кредита (лет):</label>
-            <input type="number" id="loanTerm" placeholder="Введите срок">
-
-            <button onclick="calculateLoan()">Рассчитать</button>
-
-            <h3 id="monthlyPayment"></h3>
-        </div>
+        <h2>Личный кабинет</h2>
+        <p class="info"><b>ФИО:</b> <span id="clientName">Загрузка...</span></p>
+        <p class="info"><b>ID:</b> <span id="clientID">Загрузка...</span></p>
+        <p class="info"><b>Статус:</b> <span id="clientStatus">Загрузка...</span></p>
+        <p class="info"><b>Следующий шаг:</b> <span id="nextStep">Загрузка...</span></p>
+        
+        <a href="checklist.pdf" class="btn">📄 Скачать чек-лист</a>
+        <button class="btn btn-secondary" onclick="openCalculator()">📊 Ипотечный калькулятор</button>
     </div>
 
- <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        const sheetApiUrl = "https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec?id="; // Подставь свой ID Google Apps Script
-        const BOT_TOKEN = "8123199227:AAGDrP93fevxyVPgNEcVZb0_LOOTSbR0MMk";    
-        async function loadClientData() {
-            try {
-                let response = await fetch(sheetApiUrl);
-                let data = await response.json();
+        tg.expand(); // Разворачиваем приложение на весь экран
 
-                document.getElementById("clientName").textContent = data.name || "Не найдено";
-                document.getElementById("clientID").textContent = data.id || "Не найдено";
-                document.getElementById("clientStatus").textContent = data.status || "Не найдено";
-                document.getElementById("nextStep").textContent = data.next_step || "Не найдено";
-            } catch (error) {
-                console.error("Ошибка загрузки данных:", error);
-                document.getElementById("clientName").textContent = "Ошибка";
-                document.getElementById("clientID").textContent = "Ошибка";
-                document.getElementById("clientStatus").textContent = "Ошибка";
-                document.getElementById("nextStep").textContent = "Ошибка";
+        let userData = tg.initDataUnsafe.user;
+        let userID = userData ? userData.id : "Неизвестно";
+
+        document.getElementById("clientID").innerText = userID;
+
+        async function fetchClientData() {
+            let response = await fetch("https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec?id=" + userID);
+            let data = await response.json();
+
+            document.getElementById("clientName").innerText = data.name || "Не найдено";
+            document.getElementById("clientStatus").innerText = data.status || "Не найдено";
+            document.getElementById("nextStep").innerText = data.nextStep || "Не найдено";
+        }
+
+        function openCalculator() {
+            let sum = prompt("Введите сумму кредита:");
+            let rate = prompt("Введите процентную ставку:");
+            let downPayment = prompt("Введите первоначальный взнос:");
+            let term = prompt("Введите срок кредита (в годах):");
+
+            if (sum && rate && downPayment && term) {
+                let P = (parseFloat(rate) / 100) / 12;
+                let N = parseFloat(term) * 12;
+                let L = parseFloat(sum) - parseFloat(downPayment);
+                let M = (L * P * Math.pow(1 + P, N)) / (Math.pow(1 + P, N) - 1);
+                
+                alert(`Ваш ежемесячный платёж: ${M.toFixed(2)} руб.`);
+            } else {
+                alert("Ошибка! Введите корректные данные.");
             }
         }
 
-        function calculateLoan() {
-            let loanAmount = parseFloat(document.getElementById("loanAmount").value);
-            let interestRate = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
-            let downPayment = parseFloat(document.getElementById("downPayment").value);
-            let loanTerm = parseInt(document.getElementById("loanTerm").value) * 12;
-
-            if (isNaN(loanAmount) || isNaN(interestRate) || isNaN(downPayment) || isNaN(loanTerm)) {
-                document.getElementById("monthlyPayment").innerText = "❌ Заполните все поля!";
-                return;
-            }
-
-            let loanPrincipal = loanAmount - downPayment;
-            let monthlyPayment = (loanPrincipal * interestRate * Math.pow(1 + interestRate, loanTerm)) /
-                                 (Math.pow(1 + interestRate, loanTerm) - 1);
-
-            document.getElementById("monthlyPayment").innerText = `💰 Ваш платёж: ${monthlyPayment.toFixed(2)} тг/мес`;
-        }
-
-        loadClientData(); // Загружаем данные при загрузке страницы
+        fetchClientData();
     </script>
 </body>
 </html>
