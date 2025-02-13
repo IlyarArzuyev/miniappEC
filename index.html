@@ -86,9 +86,13 @@
         </div>
     </div>
 
+ <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        
         const sheetApiUrl = "https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec"; // Подставь свой ID Google Apps Script
-
+        const BOT_TOKEN = "YOUR_BOT_TOKEN";    
         async function loadClientData() {
             try {
                 let response = await fetch(sheetApiUrl);
