@@ -7,68 +7,76 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #E3F2FD;
             text-align: center;
-            margin: 20px;
+            padding: 20px;
         }
         .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             max-width: 400px;
             margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.1);
         }
-        input, button {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
+        h2 {
+            color: #1976D2;
+        }
+        button {
+            background-color: #1976D2;
+            color: white;
+            border: none;
             padding: 10px;
-            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Личный кабинет</h2>
-        <p id="clientName">ФИО: Загрузка...</p>
-        <p id="clientID">ID: Загрузка...</p>
-        <p id="status">Статус заявки: Загрузка...</p>
-        <p id="nextStep">Следующий шаг: Загрузка...</p>
-        
+        <p><strong>ID:</strong> <span id="clientId">Загрузка...</span></p>
+        <p><strong>ФИО:</strong> <span id="clientName">Загрузка...</span></p>
+        <p><strong>Статус:</strong> <span id="clientStatus">Загрузка...</span></p>
+        <p><strong>Следующий шаг:</strong> <span id="nextStep">Загрузка...</span></p>
+        <button onclick="downloadChecklist()">📄 Скачать чек-лист</button>
         <h3>Ипотечный калькулятор</h3>
-        <input type="number" id="loanAmount" placeholder="Сумма кредита">
-        <input type="number" id="interestRate" placeholder="Процентная ставка">
-        <input type="number" id="downPayment" placeholder="Первоначальный взнос">
-        <input type="number" id="loanTerm" placeholder="Срок кредита (лет)">
-        <button onclick="calculateMortgage()">Рассчитать</button>
-        <p id="monthlyPayment">Ежемесячный платёж: </p>
-        
-        <a href="checklist.pdf" download>📄 Скачать чек-лист</a>
+        <input type="number" id="loanAmount" placeholder="Сумма займа (₸)">
+        <input type="number" id="downPayment" placeholder="Первоначальный взнос (₸)">
+        <input type="number" id="interestRate" placeholder="Процентная ставка (%)">
+        <input type="number" id="loanTerm" placeholder="Срок займа (лет)">
+        <button onclick="calculateLoan()">Рассчитать</button>
+        <p><strong>Ежемесячный платеж:</strong> <span id="monthlyPayment">-</span></p>
     </div>
-
     <script>
+        let userID = new URLSearchParams(window.location.search).get("id");
         async function fetchClientData() {
-            let userID = new URLSearchParams(window.location.search).get("id");
-            let response = await fetch("https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec?id=" + userID);
+            let response = await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?id=" + userID);
             let data = await response.json();
-            
-            document.getElementById("clientName").innerText = "ФИО: " + data.name;
-            document.getElementById("clientID").innerText = "ID: " + data.id;
-            document.getElementById("status").innerText = "Статус заявки: " + data.status;
-            document.getElementById("nextStep").innerText = "Следующий шаг: " + data.nextStep;
+            document.getElementById("clientId").textContent = data.id;
+            document.getElementById("clientName").textContent = data.name;
+            document.getElementById("clientStatus").textContent = data.status;
+            document.getElementById("nextStep").textContent = data.next_step;
         }
-        
-        function calculateMortgage() {
-            let loanAmount = parseFloat(document.getElementById("loanAmount").value);
-            let interestRate = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
-            let downPayment = parseFloat(document.getElementById("downPayment").value);
-            let loanTerm = parseFloat(document.getElementById("loanTerm").value) * 12;
-            let loanPrincipal = loanAmount - downPayment;
-
-            let monthlyPayment = (loanPrincipal * interestRate * (1 + interestRate) ** loanTerm) / ((1 + interestRate) ** loanTerm - 1);
-            document.getElementById("monthlyPayment").innerText = "Ежемесячный платёж: " + monthlyPayment.toFixed(2) + " руб.";
+        function downloadChecklist() {
+            window.location.href = "checklist.pdf";
         }
-        
+        function calculateLoan() {
+            let P = parseFloat(document.getElementById("loanAmount").value) - parseFloat(document.getElementById("downPayment").value);
+            let r = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
+            let n = parseInt(document.getElementById("loanTerm").value) * 12;
+            let M = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            document.getElementById("monthlyPayment").textContent = isNaN(M) ? "Ошибка!" : M.toFixed(2) + " ₸";
+        }
         fetchClientData();
     </script>
 </body>
