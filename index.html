@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .status, .user-info {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .next-step {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #28a745;
+            color: white;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Личный кабинет</h2>
+        <p class="user-info">ФИО: <strong id="userName">Загрузка...</strong></p>
+        <p class="user-info">ID клиента: <strong id="userId">Загрузка...</strong></p>
+        <p class="status">Статус заявки: <strong id="status">Загрузка...</strong></p>
+        <p class="next-step">Следующий шаг: <strong id="nextStep">Загрузка...</strong></p>
+        <button class="btn btn-primary">Загрузить документы</button>
+        <div class="footer">
+            <button class="btn btn-secondary" onclick="openChecklist()">Чек-лист</button>
+            <button class="btn btn-secondary" onclick="openCalculator()">Калькулятор</button>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec"; // Заменить на свой URL API
+
+        function fetchUserData(userId) {
+            fetch(`${API_URL}?id=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("userName").innerText = "Не найден";
+                        document.getElementById("status").innerText = "Не найден";
+                        document.getElementById("nextStep").innerText = "Не найден";
+                    } else {
+                        document.getElementById("userId").innerText = data.userId;
+                        document.getElementById("userName").innerText = data.userName;
+                        document.getElementById("status").innerText = data.status;
+                        document.getElementById("nextStep").innerText = data.nextStep;
+                    }
+                })
+                .catch(error => {
+                    console.error("Ошибка загрузки данных:", error);
+                });
+        }
+
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            let userId = tg.initDataUnsafe.user.id;
+            document.getElementById("userId").innerText = userId;
+            fetchUserData(userId);
+        } else {
+            document.getElementById("userId").innerText = "Неизвестно";
+        }
+
+        function openChecklist() {
+            alert("Открывается чек-лист...");
+        }
+
+        function openCalculator() {
+            alert("Открывается калькулятор ипотеки...");
+        }
+    </script>
+</body>
+</html>
