@@ -71,7 +71,7 @@
     <script>
         let userID = new URLSearchParams(window.location.search).get("id");
         async function fetchClientData() {
-            let response = await fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?id=" + userID);
+            let response = await fetch("https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec?id=" + userID);
             let data = await response.json();
             document.getElementById("clientID").innerText = data.id;
             document.getElementById("clientName").innerText = data.name;
