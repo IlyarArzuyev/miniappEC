@@ -1,93 +1,106 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title>Личный кабинет</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f8ff;
             text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
             padding: 20px;
         }
         .container {
+            max-width: 400px;
+            margin: auto;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            margin: auto;
         }
         h2 {
-            color: #007acc;
+            color: #007bff;
         }
         .info {
             text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        .calculator input {
+        .download {
+            background: #28a745;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+        }
+        input, button {
             width: 100%;
-            padding: 8px;
-            margin: 5px 0;
+            padding: 10px;
+            margin-top: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .btn {
-            background: #007acc;
+        button {
+            background: #007bff;
             color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Личный кабинет</h2>
-        <div class="info">
-            <p><strong>ID:</strong> <span id="clientID">Загрузка...</span></p>
-            <p><strong>ФИО:</strong> <span id="clientName">Загрузка...</span></p>
-            <p><strong>Статус клиента:</strong> <span id="clientStatus">Загрузка...</span></p>
-            <p><strong>Следующий шаг:</strong> <span id="nextStep">Загрузка...</span></p>
-        </div>
-        <a href="checklist.pdf" download class="btn">📄 Скачать чек-лист</a>
-        <h3>Ипотечный калькулятор</h3>
-        <div class="calculator">
-            <input type="number" id="loanAmount" placeholder="Сумма займа (тенге)">
-            <input type="number" id="downPayment" placeholder="Первоначальный взнос">
-            <input type="number" id="interestRate" placeholder="Процентная ставка">
-            <input type="number" id="loanTerm" placeholder="Срок займа (лет)">
-            <button class="btn" onclick="calculateMortgage()">Рассчитать</button>
-            <p><strong>Ежемесячный платёж:</strong> <span id="monthlyPayment">0</span> тенге</p>
-        </div>
+
+<div class="container">
+    <h2>Личный кабинет</h2>
+    <div class="info">
+        <p><b>ID:</b> <span id="userID"></span></p>
+        <p><b>ФИО:</b> <span id="fullName"></span></p>
+        <p><b>Статус:</b> <span id="status"></span></p>
+        <p><b>Следующий шаг:</b> <span id="nextStep"></span></p>
     </div>
 
-    <script>
-        let userID = new URLSearchParams(window.location.search).get("id");
-        async function fetchClientData() {
-            let response = await fetch("https://script.google.com/macros/s/AKfycbyVtaPtkbjVnDYI_ouXtWI7_3JdQa-2_-JPY2Qq6xs7qir7BOw2DDX7PAc8yfQoXLa-yQ/exec?id=" + userID);
-            let data = await response.json();
-            document.getElementById("clientID").innerText = data.id;
-            document.getElementById("clientName").innerText = data.name;
-            document.getElementById("clientStatus").innerText = data.status;
+    <a class="download" href="checklist.pdf" download>📥 Скачать чек-лист</a>
+
+    <h3>Ипотечный калькулятор</h3>
+    <input type="number" id="loanAmount" placeholder="Сумма займа (тенге)">
+    <input type="number" id="downPayment" placeholder="Первоначальный взнос">
+    <input type="number" id="interestRate" placeholder="Процентная ставка">
+    <input type="number" id="loanTerm" placeholder="Срок займа (лет)">
+    <button onclick="calculateLoan()">Рассчитать</button>
+    <p><b>Ежемесячный платеж:</b> <span id="monthlyPayment"></span></p>
+</div>
+
+<script>
+    let userID = new URLSearchParams(window.location.search).get("id");
+
+    async function fetchClientData() {
+        let response = await fetch("https://script.google.com/macros/s/AKfycbzr0dcEdoICQMvX1jKmIAxVv1WsRLX74BYaRzncxRvX11ubL9-wUtr4IuMpCNz4TVSfJQ/exec?id=" + userID);
+        let data = await response.json();
+        if (data.error) {
+            document.body.innerHTML = "<h2>Пользователь не найден</h2>";
+        } else {
+            document.getElementById("userID").innerText = data.id;
+            document.getElementById("fullName").innerText = data.fullName;
+            document.getElementById("status").innerText = data.status;
             document.getElementById("nextStep").innerText = data.nextStep;
         }
-        fetchClientData();
+    }
 
-        function calculateMortgage() {
-            let loan = parseFloat(document.getElementById("loanAmount").value);
-            let downPayment = parseFloat(document.getElementById("downPayment").value);
-            let rate = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
-            let term = parseFloat(document.getElementById("loanTerm").value) * 12;
-            let principal = loan - downPayment;
-            let monthly = (principal * rate * Math.pow(1 + rate, term)) / (Math.pow(1 + rate, term) - 1);
-            document.getElementById("monthlyPayment").innerText = isNaN(monthly) ? 0 : monthly.toFixed(2);
-        }
-    </script>
+    function calculateLoan() {
+        let P = parseFloat(document.getElementById("loanAmount").value);
+        let D = parseFloat(document.getElementById("downPayment").value);
+        let R = parseFloat(document.getElementById("interestRate").value) / 100 / 12;
+        let N = parseInt(document.getElementById("loanTerm").value) * 12;
+        
+        let loan = P - D;
+        let monthlyPayment = loan * R * Math.pow(1 + R, N) / (Math.pow(1 + R, N) - 1);
+        document.getElementById("monthlyPayment").innerText = Math.round(monthlyPayment) + " тенге";
+    }
+
+    fetchClientData();
+</script>
+
 </body>
 </html>
-
