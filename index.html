@@ -18,25 +18,32 @@
     </div>
 
     <script>
-        async function fetchUserData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('id');
-            if (!userId) return;
-            
-            const response = await fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`);
-            const data = await response.json();
-            if (data.error) {
-                document.getElementById("userInfo").innerText = "Ошибка загрузки данных";
-            } else {
-                document.getElementById("userInfo").innerHTML = `
-                    <p>ID: ${data.id}</p>
-                    <p>ФИО: ${data.full_name}</p>
-                    <p>Статус: ${data.status}</p>
-                    <p>Следующий шаг: ${data.next_step}</p>
-                `;
-            }
+       async function fetchUserData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+    if (!userId) return;
+
+    try {
+        const response = await fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`);
+        const data = await response.json();
+        console.log("Ответ от Google Apps Script:", data);  // 🟢 Проверяем ответ в консоли
+
+        if (data.error) {
+            document.getElementById("userInfo").innerText = "Ошибка загрузки данных";
+        } else {
+            document.getElementById("userInfo").innerHTML = `
+                <p>ID: ${data.id}</p>
+                <p>ФИО: ${data.full_name}</p>
+                <p>Статус: ${data.status}</p>
+                <p>Следующий шаг: ${data.next_step}</p>
+            `;
         }
-        fetchUserData();
+    } catch (error) {
+        console.error("Ошибка запроса:", error);  // 🔴 Лог ошибок
+        document.getElementById("userInfo").innerText = "Ошибка соединения";
+    }
+}
+fetchUserData();
     </script>
 </body>
 </html>
