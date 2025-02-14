@@ -1,97 +1,42 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang=\"ru\">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset=\"UTF-8\">
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">
     <title>Личный кабинет</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #121212;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
-            width: 350px;
-            text-align: center;
-        }
-        h2 {
-            color: white;
-            margin-bottom: 15px;
-        }
-        .info {
-            margin: 10px 0;
-            font-size: 18px;
-            font-weight: 500;
-            background: #333;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        .download-btn {
-            display: block;
-            background: #ffffff;
-            color: #121212;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.3s, color 0.3s;
-        }
-        .download-btn:hover {
-            background: #f0f0f0;
-            color: #000;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f8ff; margin: 0; padding: 0; }
+        .container { width: 90%; max-width: 400px; margin: 50px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        .title { font-size: 20px; font-weight: bold; color: #007bff; }
+        .info { margin-top: 10px; font-size: 16px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Личный кабинет</h2>
-        <div class="info">Chat ID: <span id="user-id">Загрузка...</span></div>
-        <div class="info">ФИО: <span id="user-name">Загрузка...</span></div>
-        <div class="info">Статус: <span id="user-status">Загрузка...</span></div>
-        <div class="info">Следующий шаг: <span id="user-next-step">Загрузка...</span></div>
-        <a href="checklist.pdf" class="download-btn" download>Скачать чек-лист</a>
+    <div class=\"container\">
+        <div class=\"title\">Личный кабинет</div>
+        <div id=\"userInfo\" class=\"info\"></div>
     </div>
-    
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let tg = window.Telegram.WebApp;
-            tg.expand();
-
-            let chatId = tg.initDataUnsafe?.user?.id;
-            if (!chatId) {
-                document.getElementById("user-id").textContent = "Ошибка: не удалось получить chat_id";
-                return;
+        async function fetchUserData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+            if (!userId) return;
+            
+            const response = await fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`);
+            const data = await response.json();
+            if (data.error) {
+                document.getElementById("userInfo").innerText = "Ошибка загрузки данных";
+            } else {
+                document.getElementById("userInfo").innerHTML = `
+                    <p>ID: ${data.id}</p>
+                    <p>ФИО: ${data.full_name}</p>
+                    <p>Статус: ${data.status}</p>
+                    <p>Следующий шаг: ${data.next_step}</p>
+                `;
             }
-
-            document.getElementById("user-id").textContent = chatId;
-
-            let apiUrl = "https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?chat_id=" + chatId;
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById("user-name").textContent = "Ошибка: " + data.error;
-                    } else {
-                        document.getElementById("user-name").textContent = data.name;
-                        document.getElementById("user-status").textContent = data.status;
-                        document.getElementById("user-next-step").textContent = data.next_step;
-                    }
-                })
-                .catch(error => console.error("Ошибка загрузки данных:", error));
-        });
+        }
+        fetchUserData();
     </script>
 </body>
 </html>
