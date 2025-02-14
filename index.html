@@ -23,7 +23,6 @@
             box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
             width: 350px;
             text-align: center;
-            animation: fadeIn 0.5s ease-in-out;
         }
         h2 {
             color: #ffffff;
@@ -53,10 +52,6 @@
             background: #f0f0f0;
             color: #000;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -70,17 +65,27 @@
     </div>
     
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачивает мини-приложение на весь экран
-        
-        // Получаем данные пользователя
-        let userData = tg.initDataUnsafe.user;
-        if (userData) {
-            document.getElementById("user-id").textContent = userData.id;
-            document.getElementById("user-name").textContent = userData.first_name + " " + (userData.last_name || "");
-            document.getElementById("user-status").textContent = "Активен"; // Статус можно подгружать из базы
-            document.getElementById("user-next-step").textContent = "Ожидание звонка";
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            let tg = window.Telegram.WebApp;
+            tg.expand();
+
+            let userId = tg.initDataUnsafe.user?.id;
+            let apiUrl = "https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=" + userId;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("user-name").textContent = "Ошибка: " + data.error;
+                    } else {
+                        document.getElementById("user-id").textContent = data.id;
+                        document.getElementById("user-name").textContent = data.name;
+                        document.getElementById("user-status").textContent = data.status;
+                        document.getElementById("user-next-step").textContent = data.next_step;
+                    }
+                })
+                .catch(error => console.error("Ошибка загрузки данных:", error));
+        });
     </script>
 </body>
 </html>
