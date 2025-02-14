@@ -32,11 +32,6 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        input {
-            width: 90%;
-            padding: 10px;
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
@@ -47,49 +42,20 @@
         <p><strong>Статус:</strong> <span id="status">Загрузка...</span></p>
         <p><strong>Следующий шаг:</strong> <span id="next_step">Загрузка...</span></p>
         <a href="checklist.pdf" download class="button">📥 Скачать чек-лист</a>
-        
-        <h2>Калькулятор ипотеки</h2>
-        <input type="number" id="loan" placeholder="Сумма займа">
-        <input type="number" id="down" placeholder="Первоначальный взнос">
-        <input type="number" id="rate" placeholder="Процентная ставка">
-        <input type="number" id="years" placeholder="Срок (лет)">
-        <button class="button" onclick="calculate()">Рассчитать</button>
-        <h2 id="result"></h2>
     </div>
 
     <script>
-        function getQueryParam(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
+        let userId = 123456; // Здесь будет ID клиента
 
-        let userId = getQueryParam("id");
-
-        if (userId) {
-            fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error("Ошибка:", data.error);
-                    } else {
-                        document.getElementById("user_id").innerText = data.id;
-                        document.getElementById("name").innerText = data.fullName;
-                        document.getElementById("status").innerText = data.status;
-                        document.getElementById("next_step").innerText = data.nextStep;
-                    }
-                })
-                .catch(error => console.error("Ошибка загрузки данных", error));
-        } else {
-            console.error("ID пользователя не найден в URL.");
-        }
-
-        function calculate() {
-            let loan = document.getElementById("loan").value - document.getElementById("down").value;
-            let rate = document.getElementById("rate").value / 100 / 12;
-            let months = document.getElementById("years").value * 12;
-            let payment = (loan * rate) / (1 - Math.pow(1 + rate, -months));
-            document.getElementById("result").innerText = `Ежемесячный платёж: ${payment.toFixed(2)} ₽`;
-        }
+        fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("user_id").innerText = data.id;
+                document.getElementById("name").innerText = data.name;
+                document.getElementById("status").innerText = data.status;
+                document.getElementById("next_step").innerText = data.next_step;
+            })
+            .catch(error => console.error("Ошибка загрузки данных", error));
     </script>
 </body>
 </html>
