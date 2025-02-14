@@ -21,9 +21,14 @@
     </div>
     
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
             let tg = window.Telegram.WebApp;
             tg.expand();
+
+            console.log("initDataUnsafe:", tg.initDataUnsafe);
+
+            // Ждём загрузки Telegram данных
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             let chatId = tg.initDataUnsafe?.user?.id;
             if (!chatId) {
@@ -45,7 +50,10 @@
                         document.getElementById("user-next-step").textContent = data.next_step;
                     }
                 })
-                .catch(error => console.error("Ошибка загрузки данных:", error));
+                .catch(error => {
+                    console.error("Ошибка загрузки данных:", error);
+                    document.getElementById("user-id").textContent = "Ошибка загрузки данных";
+                });
         });
     </script>
 </body>
