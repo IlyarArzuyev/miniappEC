@@ -58,17 +58,27 @@
     </div>
 
     <script>
-        let userId = 123456; // Здесь будет ID клиента
+        // Получаем ID пользователя из Telegram Mini App
+    let tg = window.Telegram.WebApp;
+    let userId = tg.initDataUnsafe?.user?.id; // Получаем ID пользователя
 
+    if (!userId) {
+        console.error("Ошибка: Не удалось получить ID пользователя");
+    } else {
         fetch(`https://script.google.com/macros/s/AKfycbymsadMM0QYWIgufLoE9dwkrOvUHORp1jx6Hb8n3Xlc7vt9617_2ys3RSKOpgmLJyvBXg/exec?id=${userId}`)
             .then(response => response.json())
             .then(data => {
-                document.getElementById("user_id").innerText = data.id;
-                document.getElementById("name").innerText = data.name;
-                document.getElementById("status").innerText = data.status;
-                document.getElementById("next_step").innerText = data.next_step;
+                if (data.error) {
+                    console.error("Ошибка: ", data.error);
+                } else {
+                    document.getElementById("user_id").innerText = data.id;
+                    document.getElementById("name").innerText = data.fullName;  // исправлено
+                    document.getElementById("status").innerText = data.status;
+                    document.getElementById("next_step").innerText = data.nextStep;
+                }
             })
             .catch(error => console.error("Ошибка загрузки данных", error));
+    }
 
         function calculate() {
             let loan = document.getElementById("loan").value - document.getElementById("down").value;
