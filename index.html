@@ -27,14 +27,17 @@
 
             console.log("initDataUnsafe:", tg.initDataUnsafe);
 
-            let chatId = tg.initDataUnsafe?.user?.id;
+            // Получаем chat_id
+            let chatId = tg.initDataUnsafe?.user?.id || localStorage.getItem("chat_id");
 
-            if (!chatId) {
+            if (chatId) {
+                localStorage.setItem("chat_id", chatId); // Сохраняем chat_id в браузере
+                document.getElementById("user-id").textContent = chatId;
+            } else {
                 document.getElementById("user-id").textContent = "Ошибка: не удалось получить chat_id";
                 return;
             }
 
-            document.getElementById("user-id").textContent = chatId;
             let apiUrl = "https://script.google.com/macros/s/AKfycbxOvfvZxIBtvankloDzhfUI-pQx0tsSELfqBb47jAZ472b6nwXBjhFOoJvCr62UwEG5/exec?chat_id=" + chatId;
 
             try {
