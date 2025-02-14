@@ -27,10 +27,8 @@
 
             console.log("initDataUnsafe:", tg.initDataUnsafe);
 
-            // Ждём загрузки Telegram данных
-            await new Promise(resolve => setTimeout(resolve, 500));
-
             let chatId = tg.initDataUnsafe?.user?.id;
+
             if (!chatId) {
                 document.getElementById("user-id").textContent = "Ошибка: не удалось получить chat_id";
                 return;
@@ -39,21 +37,21 @@
             document.getElementById("user-id").textContent = chatId;
             let apiUrl = "https://script.google.com/macros/s/AKfycbxOvfvZxIBtvankloDzhfUI-pQx0tsSELfqBb47jAZ472b6nwXBjhFOoJvCr62UwEG5/exec?chat_id=" + chatId;
 
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById("user-name").textContent = "Ошибка: " + data.error;
-                    } else {
-                        document.getElementById("user-name").textContent = data.name;
-                        document.getElementById("user-status").textContent = data.status;
-                        document.getElementById("user-next-step").textContent = data.next_step;
-                    }
-                })
-                .catch(error => {
-                    console.error("Ошибка загрузки данных:", error);
-                    document.getElementById("user-id").textContent = "Ошибка загрузки данных";
-                });
+            try {
+                let response = await fetch(apiUrl);
+                let data = await response.json();
+
+                if (data.error) {
+                    document.getElementById("user-name").textContent = "Ошибка: " + data.error;
+                } else {
+                    document.getElementById("user-name").textContent = data.name || "Нет данных";
+                    document.getElementById("user-status").textContent = data.status || "Нет данных";
+                    document.getElementById("user-next-step").textContent = data.next_step || "Нет данных";
+                }
+            } catch (error) {
+                console.error("Ошибка загрузки данных:", error);
+                document.getElementById("user-id").textContent = "Ошибка загрузки данных";
+            }
         });
     </script>
 </body>
